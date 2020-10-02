@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   app:
-    image: recipeappapi
+    image: app
     build:
       context: .
       dockerfile: Dockerfile
