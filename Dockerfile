@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8-slim-buster
+FROM python:3.8-alpine
 
 EXPOSE 8000
 
@@ -12,15 +12,19 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Install pip requirements
-ADD requirements.txt .
+# Install dependencies
+COPY ./requirements.txt /requirements.txt
+RUN apk add --update --no-cache postgresql-client
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+    gcc libc-dev linux-headers postgresql-dev
 RUN python -m pip install -r requirements.txt
+RUN apk del .tmp-build-deps
 
 WORKDIR /app
 ADD . /app
 
-# Switching to a non-root user, please refer to https://aka.ms/vscode-docker-python-user-rights
-RUN useradd appuser && chown -R appuser /app
-USER appuser
+RUN adduser -D user
+USER user
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 # File wsgi.py was not found in subfolder: 'recipe-app-api'. Please enter the Python path to wsgi file.
